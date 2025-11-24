@@ -162,43 +162,74 @@ return 1;
     4 -> datainicial > datafinal
     Caso o cálculo esteja correto, os atributos qtdDias, qtdMeses e qtdAnos devem ser preenchidos com os valores correspondentes.
  */
+
+int diasNoMes(int mes, int ano) {
+    if (mes == 4 || mes == 6 || mes == 9 || mes == 11)
+        return 30;
+    if (mes == 2) {
+        if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0))
+            return 29;
+        else
+            return 28;
+    }
+    return 31;
+}
+
+int compararDatas(int d1, int m1, int a1, int d2, int m2, int a2) {
+    if (a1 > a2) return 1;
+    if (a1 < a2) return 0;
+    
+    if (m1 > m2) return 1;
+    if (m1 < m2) return 0;
+    
+    if (d1 > d2) return 1;
+    
+    return 0;
+}
+
 DiasMesesAnos q2(char datainicial[], char datafinal[])
 {
-	DiasMesesAnos dma;
+    DiasMesesAnos dma;
     dma.qtdDias = 0;
     dma.qtdMeses = 0;
     dma.qtdAnos = 0;
     dma.retorno = 0;
 
-    Data dInicial;
-    Data dFinal;
-
-    if (q1(datainicial, &dInicial) == 0){
-      dma.retorno = 2; 
-      return dma;
+    DataQuebrada dInicialQuebrada = quebraData(datainicial);
+    DataQuebrada dFinalQuebrada = quebraData(datafinal);
+    
+    if (dInicialQuebrada.valido == 0) {
+        dma.retorno = 2;
+        return dma;
     }
     
-    if (q1(datafinal, &dFinal) == 0){
-      dma.retorno = 3;
-      return dma;
+    if (dFinalQuebrada.valido == 0) {
+        dma.retorno = 3;
+        return dma;
     }
-
-    if (compararDatas(dInicial, dFinal) == 1) {
+    
+    if (compararDatas(dInicialQuebrada.iDia, dInicialQuebrada.iMes, dInicialQuebrada.iAno, 
+                      dFinalQuebrada.iDia, dFinalQuebrada.iMes, dFinalQuebrada.iAno) == 1) 
+    {
         dma.retorno = 4;
         return dma;
     }
-
-    int d_i = dInicial.dia;
-    int m_i = dInicial.mes;
-    int a_i = dInicial.ano;
     
-    int totalDias = dFinal.dia - d_i;
-    int totalMeses = dFinal.mes - m_i;
-    int totalAnos = dFinal.ano - a_i;
+    int d_i = dInicialQuebrada.iDia;
+    int m_i = dInicialQuebrada.iMes;
+    int a_i = dInicialQuebrada.iAno;
+    
+    int d_f = dFinalQuebrada.iDia;
+    int m_f = dFinalQuebrada.iMes;
+    int a_f = dFinalQuebrada.iAno;
+    
+    int totalDias = d_f - d_i;
+    int totalMeses = m_f - m_i;
+    int totalAnos = a_f - a_i;
     
     if (totalDias < 0) {
         totalMeses--;
-        totalDias += diasNoMes(dFinal.mes == 1 ? 12 : dFinal.mes - 1, dFinal.ano);
+        totalDias += diasNoMes(m_f == 1 ? 12 : m_f - 1, a_f);
     }
     
     if (totalMeses < 0) {
@@ -210,10 +241,8 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
     dma.qtdMeses = totalMeses;
     dma.qtdDias = totalDias;
     
-    dma.retorno = 1; 
+    dma.retorno = 1;
     return dma;
-    
-    
 }
 
 /*
